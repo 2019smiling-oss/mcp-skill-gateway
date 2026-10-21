@@ -1,0 +1,9 @@
+name: hello-skill
+version: 1.0.0
+description: Render a personalized greeting
+input_schema_inline:
+  type: object
+  required: [name]
+  properties:
+    name:
+      type: string

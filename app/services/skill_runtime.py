@@ -29,5 +29,14 @@ def validate_schema(schema: dict, inputs: dict) -> None:
             raise ValueError(f"Missing required input: {key}")
     types = {"string": str, "integer": int, "number": (int, float), "boolean": bool, "object": dict, "array": list}
     for key, spec in schema.get("properties", {}).items():
-        if key in inputs and spec.get("type") in types and not isinstance(inputs[key], types[spec["type"]]):
-            raise ValueError(f"Input '{key}' must be {spec['type']}")
+        expected_type = spec.get("type")
+        if key not in inputs or expected_type not in types:
+            continue
+
+        value = inputs[key]
+        matches_type = isinstance(value, types[expected_type])
+        # Python treats bool as a subclass of int, but JSON Schema does not.
+        if expected_type in {"integer", "number"} and isinstance(value, bool):
+            matches_type = False
+        if not matches_type:
+            raise ValueError(f"Input '{key}' must be {expected_type}")
